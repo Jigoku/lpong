@@ -97,7 +97,7 @@ end
 
 function love.draw()
 	--pitch
-	love.graphics.setColor(10,10,10,255)
+	love.graphics.setColor(30,30,30,255)
 	love.graphics.rectangle("fill", pitch.x, pitch.y, pitch.w, pitch.h)
 
 	--pitch boundaries
@@ -110,10 +110,16 @@ function love.draw()
 	love.graphics.setColor(80,150,180,255)
 	love.graphics.rectangle("fill", player1.x, player1.y, player1.w, player1.h)
 	love.graphics.rectangle("fill", player2.x, player2.y, player2.w, player2.h)
+	love.graphics.setColor(0,0,0,255)
+	love.graphics.rectangle("line", player1.x, player1.y, player1.w, player1.h)
+	love.graphics.rectangle("line", player2.x, player2.y, player2.w, player2.h)
 
 	--ball
 	love.graphics.setColor(10,130,200,255)
 	love.graphics.circle("fill", ball.x, ball.y, ball.w, ball.h)
+	love.graphics.setColor(0,0,0,255)
+	love.graphics.circle("line", ball.x, ball.y, ball.w, ball.h)
+
 
 	--titlesscreen overlay
 	if mode == 0 or mode == 3 then
@@ -204,13 +210,13 @@ function love.update(dt)
 		love.timer.sleep(1/60 - dt)
 	end
 
-	game(dt)
+	main(dt)
 end
 
 
 
 
-function game(dt)
+function main(dt)
 	-- is paused?
 	if not (mode == 3) then
 
@@ -224,37 +230,6 @@ function game(dt)
 			player1.y = player1.y +300 * dt
 		end
 	end
-
-	-- ai oppponent (slightly slower)
-	if mode == 0 or mode == 1 then
-		if ball.xvel < 0 then
-			if ball.x > (pitch.w/3) and not (ball.x < pitch.w/4) then
-				if ball.y < player2.y + (player2.h/2) then
-					player2.y = player2.y -270 * dt
-				end
-
-				if ball.y > player2.y + (player2.h/2) then
-					player2.y = player2.y +270 * dt
-				end
-			end
-		end
-	end
-	-- ai demo (player 1)
-	if mode == 0 then
-		if ball.xvel > 0 then
-			if ball.x < pitch.w -(pitch.w/3) and not (ball.x > pitch.w-(pitch.w/4)) then
-				if ball.y < player1.y + (player1.h/2) then
-					player1.y = player1.y -270 * dt
-				end
-
-				if ball.y > player1.y + (player1.h/2) then
-					player1.y = player1.y +270 * dt
-				end
-			end
-		end
-	end
-
-
 	--player2 controls
 	if mode == 2 then
 		if love.keyboard.isDown("up") and not (player2.y < pitch.y) then
@@ -263,6 +238,36 @@ function game(dt)
 
 		if love.keyboard.isDown("down") and not (player2.y >= (pitch.h - player2.h) + pitch.y - (pitch.y/4)) then
 			player2.y = player2.y +300 * dt
+		end
+	end
+
+
+	-- ai (player 1)
+	if mode == 0 then
+		if ball.xvel > 0 then
+			if ball.x < pitch.w -(pitch.w/3) and not (ball.x > pitch.w-(pitch.w/4)) then
+				if ball.y < player1.y + (player1.h/2) and not (player1.y <= pitch.y) then
+					player1.y = player1.y -300 * dt
+				end
+
+				if ball.y > player1.y + (player1.h/2) then
+					player1.y = player1.y +300 * dt
+				end
+			end
+		end
+	end
+	-- ai (player 2)
+	if mode == 0 or mode == 1 then
+		if ball.xvel < 0 then
+			if ball.x > (pitch.w/3) and not (ball.x < pitch.w/4) then
+				if ball.y < player2.y + (player2.h/2) and not (player2.y <= pitch.y) then
+					player2.y = player2.y -300 * dt
+				end
+
+				if ball.y > player2.y + (player2.h/2) then
+					player2.y = player2.y +300 * dt
+				end
+			end
 		end
 	end
 
@@ -280,19 +285,17 @@ function game(dt)
 	end
 
 	-- check left left paddle
-	if ball.x < (player1.x + player1.w) then
-		if checkCollision(player1.x, player1.y, player1.w, player1.h,
-				 ball.x, ball.y, ball.w, ball.h) then
-			ball.xvel = -ball.xvel
-		end
+	--if ball.x < (player1.x + player1.w) then
+	if checkCollision(player1.x, player1.y, player1.w, player1.h,
+			 ball.x, ball.y, ball.w, ball.h) then
+		ball.xvel = -ball.xvel
 	end
+	--end
 
 	-- check right paddle
-	if ball.x > player2.x then
-		if checkCollision(player2.x, player2.y, player2.w, player2.h,
-                                 ball.x, ball.y, ball.w, ball.h) then
-			ball.xvel = -ball.xvel
-		end
+	if checkCollision(player2.x, player2.y, player2.w, player2.h,
+			ball.x, ball.y, ball.w, ball.h) then
+		ball.xvel = -ball.xvel
 	end
 
 	-- bounce ball from top
